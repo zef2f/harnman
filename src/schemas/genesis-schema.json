@@ -1,0 +1,72 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Genesis Schema",
+  "description": "Base schema for all mutation-based fuzzers.",
+  "type": "object",
+  "properties": {
+    "wrapper_id": {
+      "type": "string",
+      "description": "Unique identifier for this fuzzing wrapper."
+    },
+    "fuzzer": {
+      "type": "object",
+      "description": "Fuzzer engine details.",
+      "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the fuzzer."
+          }
+        },
+        "required": ["name"]
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Basic details about this fuzzer setup.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Descriptive name for this wrapper."
+        },
+        "description": {
+          "type": "string",
+          "description": "A short explanation of what this wrapper does."
+        }
+      },
+      "required": ["name", "description"]
+    },
+    "build": {
+      "type": "object",
+      "description": "How the target program should be compiled.",
+      "properties": {
+        "build_cmd": {
+          "type": "string",
+          "description": "Command to compile the program with necessary fuzzing instrumentation."
+        }
+      },
+      "required": ["build_cmd"]
+    },
+    "fuzz": {
+      "type": "object",
+      "description": "Settings for running the fuzzer.",
+      "properties": {
+        "fuzz_cmd": {
+          "type": "string",
+          "description": "Command to start the fuzzing process."
+        }
+      },
+      "required": ["fuzz_cmd"]
+    },
+    "coverage": {
+      "type": "object",
+      "description": "How to collect and analyze coverage data.",
+      "properties": {
+        "coverage_cmd": {
+          "type": "string",
+          "description": "Command to gather coverage information."
+        }
+      },
+      "required": ["coverage_cmd"]
+    }
+  },
+  "required": ["wrapper_id", "fuzzer", "metadata", "build", "fuzz", "coverage"]
+}
