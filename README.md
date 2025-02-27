@@ -1,1 +1,1 @@
-wraphelper CLI tool for fuzzing wrappers managing 
+wrapman CLI tool for fuzzing wrappers managing 
