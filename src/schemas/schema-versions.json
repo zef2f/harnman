@@ -1,0 +1,6 @@
+{
+  "libfuzzer": {
+    "current": "acacia",
+    "versions": ["acacia"]
+  }
+}
