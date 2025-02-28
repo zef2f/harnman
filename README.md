@@ -33,17 +33,17 @@ wrapman -l
 Displays all wrappers described in `config/`.
 
 ```sh
-wrapman -bcmd array_array
+wrapman -bcmd <wrapper_name>
 ```
-Outputs the command used to compile the `array_array` project (e.g., `clang -fsanitize=... ...`).
+Outputs the command used to compile the `<wrapper_name>` project (e.g., `clang -fsanitize=... ...`).
 
 ```sh
-wrapman -fcmd tar
+wrapman -fcmd <wrapper_name>
 ```
 Returns the fuzzing execution command, e.g., `-max_total_time=30 ...`.
 
 ```sh
-wrapman -ccmd datetime_fromisoformat
+wrapman -ccmd <wrapper_name>
 ```
 Outputs the command for coverage collection (e.g., `echo 'Coverage step not implemented'`).
 
