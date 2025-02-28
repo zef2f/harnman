@@ -1,6 +1,6 @@
 {
   "libfuzzer": {
-    "current": "acacia",
-    "versions": ["acacia"]
+    "current": "genesis",
+    "versions": ["genesis"]
   }
 }
