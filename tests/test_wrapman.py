@@ -51,7 +51,8 @@ class TestWrapmanCLI(unittest.TestCase):
             wrapman.main()
         self.assertEqual(cm.exception.code, 1)
         error_output = sys.stderr.getvalue().strip()
-        self.assertEqual(error_output, "Error: Wrapper 'unknown_wrapper' not found.")
+        print(error_output)
+        self.assertEqual(error_output, "Error: Wrapper 'unknown_wrapper' not found or no fuzz command specified.")
 
     @patch("wrapman.base.get_build_cmd", return_value="clang -o wrapper1 wrapper1.c")
     def test_build_cmd(self, mock_get_build_cmd):
@@ -69,7 +70,7 @@ class TestWrapmanCLI(unittest.TestCase):
             wrapman.main()
         self.assertEqual(cm.exception.code, 1)
         error_output = sys.stderr.getvalue().strip()
-        self.assertEqual(error_output, "Error: Wrapper 'unknown_wrapper' not found.")
+        self.assertEqual(error_output, "Error: Wrapper 'unknown_wrapper' not found or no build command specified.")
 
     @patch("wrapman.base.get_cov_cmd", return_value="llvm-cov wrapper1")
     def test_coverage_cmd(self, mock_get_cov_cmd):
@@ -87,7 +88,7 @@ class TestWrapmanCLI(unittest.TestCase):
             wrapman.main()
         self.assertEqual(cm.exception.code, 1)
         error_output = sys.stderr.getvalue().strip()
-        self.assertEqual(error_output, "Error: Wrapper 'unknown_wrapper' not found.")
+        self.assertEqual(error_output, "Error: Wrapper 'unknown_wrapper' not found or no coverage command specified.")
 
     def test_help_message(self):
         """Test displaying the help message."""
