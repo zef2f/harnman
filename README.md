@@ -80,3 +80,8 @@ Each wrapper is described in a JSON file in the following format:
 - **fuzz_cmd** → Fuzzing execution command
 - **coverage_cmd** → Coverage collection command
 
+## For Developers
+
+### Tests
+`wrapman` project use pytest for running tests. Run tests command example:
+`PYTHONPATH=$(pwd)/src python3 -m pytest tests`
