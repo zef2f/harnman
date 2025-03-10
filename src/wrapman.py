@@ -2,12 +2,14 @@
 
 import argparse
 import sys
+import json
 from src.common import base
 
 def list_wrappers():
     """Prints a list of all available wrappers."""
     try:
         wrappers = base.get_wrap_names()
+
         if wrappers:
             print("\n".join(wrappers))
         else:
@@ -16,7 +18,23 @@ def list_wrappers():
         print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
     except Exception as e:
-        # Можно добавить логирование или traceback в debug-режиме
+        print(f"Unexpected error: {e}", file=sys.stderr)
+        sys.exit(1)
+
+def list_wrappers_json():
+    """Prints details of all available wrappers, optionally in JSON format."""
+    try:
+        wrappers = base.get_wrap_names()
+
+        if wrappers:
+            print(json.dumps(wrappers))
+        else:
+            print("No wrappers found.")
+
+    except (FileNotFoundError, PermissionError, OSError) as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
+    except Exception as e:
         print(f"Unexpected error: {e}", file=sys.stderr)
         sys.exit(1)
 
@@ -68,6 +86,7 @@ def print_coverage_cmd(wrap_name):
 def main():
     parser = argparse.ArgumentParser(description="CLI utility for managing fuzzing wrappers")
     parser.add_argument("-l", "--list", action="store_true", help="List all available wrappers")
+    parser.add_argument("--json", action="store_true", help="Output list in JSON format")
     parser.add_argument("-fcmd", metavar="NAME", help="Print the fuzzing command for the specified wrapper")
     parser.add_argument("-bcmd", metavar="NAME", help="Print the build command for the specified wrapper")
     parser.add_argument("-ccmd", metavar="NAME", help="Print the coverage collection command for the specified wrapper")
@@ -75,7 +94,10 @@ def main():
     args = parser.parse_args()
 
     if args.list:
-        list_wrappers()
+        if args.json:
+            list_wrappers_json()
+        else:
+            list_wrappers()
     elif args.fcmd:
         print_fuzz_cmd(args.fcmd)
     elif args.bcmd:
@@ -84,7 +106,6 @@ def main():
         print_coverage_cmd(args.ccmd)
     else:
         parser.print_help()
-        # Система, где help — это успешный выход
         sys.exit(0)
 
 if __name__ == "__main__":
