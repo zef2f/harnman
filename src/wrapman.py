@@ -3,12 +3,17 @@
 import argparse
 import sys
 import json
-from src.common import base
+import os
+
+# Добавляем путь к корневой директории проекта
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
+
+from utils.wrapman.src.common.base import get_wrap_names, get_fuzz_cmd, get_build_cmd, get_cov_cmd
 
 def list_wrappers():
     """Prints a list of all available wrappers."""
     try:
-        wrappers = base.get_wrap_names()
+        wrappers = get_wrap_names()
 
         if wrappers:
             print("\n".join(wrappers))
@@ -24,7 +29,7 @@ def list_wrappers():
 def list_wrappers_json():
     """Prints details of all available wrappers, optionally in JSON format."""
     try:
-        wrappers = base.get_wrap_names()
+        wrappers = get_wrap_names()
 
         if wrappers:
             print(json.dumps(wrappers))
@@ -41,7 +46,7 @@ def list_wrappers_json():
 def print_fuzz_cmd(wrap_name):
     """Prints the fuzzing command for the specified wrapper."""
     try:
-        cmd = base.get_fuzz_cmd(wrap_name)
+        cmd = get_fuzz_cmd(wrap_name)
         print(cmd)
     except KeyError:
         print(f"Error: Wrapper '{wrap_name}' not found or no fuzz command specified.", file=sys.stderr)
@@ -56,7 +61,7 @@ def print_fuzz_cmd(wrap_name):
 def print_build_cmd(wrap_name):
     """Prints the build command for the specified wrapper."""
     try:
-        cmd = base.get_build_cmd(wrap_name)
+        cmd = get_build_cmd(wrap_name)
         print(cmd)
     except KeyError:
         print(f"Error: Wrapper '{wrap_name}' not found or no build command specified.", file=sys.stderr)
@@ -71,7 +76,7 @@ def print_build_cmd(wrap_name):
 def print_coverage_cmd(wrap_name):
     """Prints the coverage collection command for the specified wrapper."""
     try:
-        cmd = base.get_cov_cmd(wrap_name)
+        cmd = get_cov_cmd(wrap_name)
         print(cmd)
     except KeyError:
         print(f"Error: Wrapper '{wrap_name}' not found or no coverage command specified.", file=sys.stderr)
