@@ -2,7 +2,7 @@ import json
 import os
 
 # Позволяем переопределить директорию через переменную окружения
-CONFIG_DIR = os.getenv("WRAPMAN_CONFIG_DIR", "config")
+CONFIG_DIR = os.getenv("WRAPMAN_CONFIG_DIR", "assets/configs")
 
 
 def _resolve_config_path(wrapper_name: str) -> str:

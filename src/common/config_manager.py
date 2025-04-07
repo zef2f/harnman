@@ -3,7 +3,7 @@ import os
 from jsonschema import validate, ValidationError, SchemaError
 
 # Получаем путь к директории конфигов из переменной окружения или используем "config/" по умолчанию
-CONFIG_DIR = os.getenv("WRAPMAN_CONFIG_DIR", "config")
+CONFIG_DIR = os.getenv("WRAPMAN_CONFIG_DIR", "assets/configs")
 
 
 def add_config(wrapper_name: str, data: dict) -> bool:
