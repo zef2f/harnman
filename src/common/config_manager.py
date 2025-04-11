@@ -1,23 +1,24 @@
 import json
 import os
+import re
 from jsonschema import validate, ValidationError, SchemaError
 
-# Получаем путь к директории конфигов из переменной окружения или используем "config/" по умолчанию
-CONFIG_DIR = os.getenv("WRAPMAN_CONFIG_DIR", "assets/configs")
+CONFIG_DIR = os.getenv("HARNMAN_CONFIG_DIR", "assets/configs")
+
+VALID_FILENAME_PATTERN = re.compile(r'^[a-zA-Z0-9_-]+$')
 
 
-def add_config(wrapper_name: str, data: dict) -> bool:
+def add_config(harness_name: str, data: dict) -> bool:
     """
-    Add a new JSON config file for a given wrapper, if it doesn't exist.
-
-    :param wrapper_name: Название обёртки (без .json)
-    :param data: Содержимое конфигурационного файла (словарь)
-    :return: True, если успешно добавлен
+    Add a new JSON config file for a given harness, if it doesn't exist.
     """
     if not isinstance(data, dict):
         raise TypeError("Parameter 'data' must be a dictionary.")
 
-    config_filename = f"{wrapper_name}.json"
+    if not harness_name or not VALID_FILENAME_PATTERN.match(harness_name):
+        raise ValueError(f"Invalid harness name: '{harness_name}'. Use only letters, numbers, underscore and hyphen.")
+
+    config_filename = f"{harness_name}.json"
     file_path = os.path.join(CONFIG_DIR, config_filename)
 
     if not os.path.isdir(CONFIG_DIR):
@@ -40,14 +41,11 @@ def add_config(wrapper_name: str, data: dict) -> bool:
     return True
 
 
-def delete_config(wrapper_name: str) -> bool:
+def delete_config(harness_name: str) -> bool:
     """
-    Delete a JSON configuration file for a given wrapper.
-
-    :param wrapper_name: Название обёртки (без .json)
-    :return: True, если успешно удалён
+    Delete a JSON configuration file for a given harness.
     """
-    config_filename = f"{wrapper_name}.json"
+    config_filename = f"{harness_name}.json"
     file_path = os.path.join(CONFIG_DIR, config_filename)
 
     if not os.path.isdir(CONFIG_DIR):
@@ -67,16 +65,12 @@ def delete_config(wrapper_name: str) -> bool:
     return True
 
 
-def rename_config(old_wrapper: str, new_wrapper: str) -> bool:
+def rename_config(old_harness: str, new_harness: str) -> bool:
     """
-    Rename a JSON config file for a given wrapper.
-
-    :param old_wrapper: Текущее название обёртки (без .json)
-    :param new_wrapper: Новое название обёртки (без .json)
-    :return: True, если переименование успешно
+    Rename a JSON config file for a given harness.
     """
-    old_filename = f"{old_wrapper}.json"
-    new_filename = f"{new_wrapper}.json"
+    old_filename = f"{old_harness}.json"
+    new_filename = f"{new_harness}.json"
 
     old_path = os.path.join(CONFIG_DIR, old_filename)
     new_path = os.path.join(CONFIG_DIR, new_filename)
@@ -87,7 +81,7 @@ def rename_config(old_wrapper: str, new_wrapper: str) -> bool:
     if not os.path.exists(old_path):
         raise FileNotFoundError(f"Config file '{old_filename}' not found in '{CONFIG_DIR}'.")
 
-    if old_wrapper == new_wrapper:
+    if old_harness == new_harness:
         return True
 
     if os.path.exists(new_path):
@@ -109,9 +103,8 @@ def rename_config(old_wrapper: str, new_wrapper: str) -> bool:
 
 def list_config() -> list:
     """
-    Return a list of wrapper names from the CONFIG_DIR (excluding .json extension).
-
-    :return: Список названий обёрток (строки)
+    Return a list of harness names from the CONFIG_DIR (excluding .json extension).
+    Only includes files with valid names (letters, numbers, underscore, hyphen).
     """
     if not os.path.isdir(CONFIG_DIR):
         raise FileNotFoundError(f"Directory '{CONFIG_DIR}' not found.")
@@ -120,7 +113,9 @@ def list_config() -> list:
         return [
             filename.removesuffix(".json")
             for filename in os.listdir(CONFIG_DIR)
-            if filename.endswith(".json") and os.path.isfile(os.path.join(CONFIG_DIR, filename))
+            if filename.endswith(".json") and 
+            os.path.isfile(os.path.join(CONFIG_DIR, filename)) and
+            VALID_FILENAME_PATTERN.match(filename.removesuffix(".json"))
         ]
     except PermissionError:
         raise PermissionError(f"Permission denied: cannot access '{CONFIG_DIR}'.")
@@ -128,14 +123,11 @@ def list_config() -> list:
         raise OSError(f"Filesystem error while accessing '{CONFIG_DIR}': {e}")
 
 
-def read_config(wrapper_name: str) -> dict:
+def read_config(harness_name: str) -> dict:
     """
-    Read a JSON config file for a given wrapper and return its content as a dictionary.
-
-    :param wrapper_name: Название обёртки (без .json)
-    :return: Содержимое конфигурационного файла (dict)
+    Read a JSON config file for a given harness and return its content as a dictionary.
     """
-    config_filename = f"{wrapper_name}.json"
+    config_filename = f"{harness_name}.json"
     file_path = os.path.join(CONFIG_DIR, config_filename)
 
     if not os.path.isdir(CONFIG_DIR):
@@ -155,12 +147,9 @@ def read_config(wrapper_name: str) -> dict:
         raise OSError(f"Filesystem error while reading '{file_path}': {e}")
 
 
-# ------------------ Вспомогательные функции для валидации ------------------
-
 def load_json_file(path: str) -> dict:
     """
     Load and return JSON data from a file.
-    Вызывается внутри validate_config (и может использоваться отдельно).
     """
     if not os.path.exists(path):
         raise FileNotFoundError(f"File '{path}' not found.")
@@ -178,28 +167,26 @@ def load_json_file(path: str) -> dict:
 def validate_json(data: dict, schema: dict) -> None:
     """
     Validate JSON data against a given schema.
-    Raises ValueError if invalid data or schema.
     """
     try:
         validate(instance=data, schema=schema)
     except SchemaError as e:
-        raise ValueError(f"Schema is invalid: {e}")
+        raise ValueError(f"Schema is invalid: {e.message}")
     except ValidationError as e:
-        # Можно при желании собирать все ошибки, если это важно
-        raise ValueError(f"Validation failed: {e.message}")
+        path = " -> ".join(str(p) for p in e.absolute_path)
+        message = f"at '{path}': {e.message}" if path else e.message
+        raise ValueError(f"Validation failed: {message}")
 
 
-def validate_config(wrapper_name: str, schema_path: str) -> bool:
+def validate_config(harness_name: str, schema_path: str) -> bool:
     """
-    High-level function that validates the JSON config of a wrapper against a specified schema.
-
-    :param wrapper_name: Название обёртки (без .json)
-    :param schema_path: Путь к JSON-схеме, согласно которой валидируем
-    :return: True, если валидация прошла успешно
+    High-level function that validates the JSON config of a harness against a specified schema.
     """
-    config_path = os.path.join(CONFIG_DIR, f"{wrapper_name}.json")
+    if not harness_name or not VALID_FILENAME_PATTERN.match(harness_name):
+        raise ValueError(f"Invalid harness name: '{harness_name}'")
+
     schema_data = load_json_file(schema_path)
-    config_data = load_json_file(config_path)
+    config_data = load_json_file(os.path.join(CONFIG_DIR, f"{harness_name}.json"))
 
     validate_json(config_data, schema_data)
     return True

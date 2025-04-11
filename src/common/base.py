@@ -29,46 +29,28 @@ def _expand_shell_substitutions(cmd: str) -> str:
             print(f"[ERROR] Shell substitution failed for '{command_inside}': {e}", file=sys.stderr)
             return ""
     
-    # Perform substitution by pattern
     return re.sub(pattern, _replace, cmd)
 
-def get_wrap_names() -> list:
-    """
-    Returns a list of all available wrappers (configs).
-    Uses list_config() from config_manager.
-    """
-    return config_manager.list_config()
+def get_harn_names() -> list:
+    try:
+        return config_manager.list_config()
+    except FileNotFoundError:
+        return []
 
-def get_fuzz_cmd(wrap_name: str) -> str:
-    """
-    Returns the fuzzing command (fuzz_cmd) for the specified wrapper.
-    Reads the "fuzz.fuzz_cmd" field using read_config_field() from config_editor.
-    Expands any $(...) shell substitutions in the command.
-    """
-    raw_cmd = config_editor.read_config_field(wrap_name, "fuzz.fuzz_cmd")
+def get_fuzz_cmd(harn_name: str) -> str:
+    raw_cmd = config_editor.read_config_field(harn_name, "fuzz.fuzz_cmd")
     if not raw_cmd:
         return ""
-    return _expand_shell_substitutions(raw_cmd)
+    return raw_cmd
 
-def get_cov_cmd(wrap_name: str) -> str:
-    """
-    Returns the coverage collection command (coverage_cmd) for the specified wrapper.
-    Reads the "coverage.coverage_cmd" field using read_config_field().
-    Expands any $(...) shell substitutions in the command.
-    """
-    raw_cmd = config_editor.read_config_field(wrap_name, "coverage.coverage_cmd")
+def get_cov_cmd(harn_name: str) -> str:
+    raw_cmd = config_editor.read_config_field(harn_name, "coverage.coverage_cmd")
     if not raw_cmd:
         return ""
-    return _expand_shell_substitutions(raw_cmd)
+    return raw_cmd
 
-def get_build_cmd(wrap_name: str) -> str:
-    """
-    Returns the build command (build_cmd) for the specified wrapper.
-    Reads the "build.build_cmd" field using read_config_field().
-    Expands any $(...) shell substitutions in the command.
-    """
-    raw_cmd = config_editor.read_config_field(wrap_name, "build.build_cmd")
+def get_build_cmd(harn_name: str) -> str:
+    raw_cmd = config_editor.read_config_field(harn_name, "build.build_cmd")
     if not raw_cmd:
         return ""
-    return _expand_shell_substitutions(raw_cmd)
-
+    return raw_cmd

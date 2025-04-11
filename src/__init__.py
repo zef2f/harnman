@@ -1,5 +1,5 @@
 """
-Wrapman package for managing fuzzing wrappers.
+Harnman package for managing fuzzing harnesses.
 """
 
 

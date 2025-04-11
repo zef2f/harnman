@@ -1,5 +1,5 @@
 """
-Common utilities for wrapman.
+Common utilities for harnman.
 """
 
 

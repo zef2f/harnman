@@ -4,9 +4,9 @@
   "description": "Base schema for all mutation-based fuzzers.",
   "type": "object",
   "properties": {
-    "wrapper_id": {
+    "harness_id": {
       "type": "string",
-      "description": "Unique identifier for this fuzzing wrapper."
+      "description": "Unique identifier for this fuzzing harness."
     },
     "fuzzer": {
       "type": "object",
@@ -25,11 +25,11 @@
       "properties": {
         "name": {
           "type": "string",
-          "description": "Descriptive name for this wrapper."
+          "description": "Descriptive name for this harness."
         },
         "description": {
           "type": "string",
-          "description": "A short explanation of what this wrapper does."
+          "description": "A short explanation of what this harness does."
         }
       },
       "required": ["name", "description"]
@@ -68,5 +68,5 @@
       "required": ["coverage_cmd"]
     }
   },
-  "required": ["wrapper_id", "fuzzer", "metadata", "build", "fuzz", "coverage"]
+  "required": ["harness_id", "fuzzer", "metadata", "build", "fuzz", "coverage"]
 }
