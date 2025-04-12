@@ -5,7 +5,7 @@ from jsonschema import validate, ValidationError, SchemaError
 
 CONFIG_DIR = os.getenv("HARNMAN_CONFIG_DIR", "assets/configs")
 
-VALID_FILENAME_PATTERN = re.compile(r'^[a-zA-Z0-9_-]+$')
+VALID_FILENAME_PATTERN = re.compile(r"^[a-zA-Z0-9_-]+$")
 
 
 def add_config(harness_name: str, data: dict) -> bool:
@@ -16,7 +16,9 @@ def add_config(harness_name: str, data: dict) -> bool:
         raise TypeError("Parameter 'data' must be a dictionary.")
 
     if not harness_name or not VALID_FILENAME_PATTERN.match(harness_name):
-        raise ValueError(f"Invalid harness name: '{harness_name}'. Use only letters, numbers, underscore and hyphen.")
+        raise ValueError(
+            f"Invalid harness name: '{harness_name}'. Use only letters, numbers, underscore and hyphen."
+        )
 
     config_filename = f"{harness_name}.json"
     file_path = os.path.join(CONFIG_DIR, config_filename)
@@ -28,15 +30,23 @@ def add_config(harness_name: str, data: dict) -> bool:
         with open(file_path, "x", encoding="utf-8") as file:
             json.dump(data, file, indent=4)
     except FileExistsError:
-        raise FileExistsError(f"Config file '{config_filename}' already exists in '{CONFIG_DIR}'.")
+        raise FileExistsError(
+            f"Config file '{config_filename}' already exists in '{CONFIG_DIR}'."
+        )
     except PermissionError:
-        raise PermissionError(f"Permission denied: cannot write to '{file_path}'.")
+        raise PermissionError(
+            f"Permission denied: cannot write to '{file_path}'."
+        )
     except IsADirectoryError:
-        raise IsADirectoryError(f"Cannot create '{file_path}': A directory with this name exists.")
+        raise IsADirectoryError(
+            f"Cannot create '{file_path}': A directory with this name exists."
+        )
     except TypeError as e:
         raise TypeError(f"Invalid data type in JSON: {e}")
     except OSError as e:
-        raise OSError(f"Filesystem error while creating '{config_filename}': {e}")
+        raise OSError(
+            f"Filesystem error while creating '{config_filename}': {e}"
+        )
 
     return True
 
@@ -54,13 +64,19 @@ def delete_config(harness_name: str) -> bool:
     try:
         os.remove(file_path)
     except FileNotFoundError:
-        raise FileNotFoundError(f"Config file '{config_filename}' not found in '{CONFIG_DIR}'.")
+        raise FileNotFoundError(
+            f"Config file '{config_filename}' not found in '{CONFIG_DIR}'."
+        )
     except PermissionError:
-        raise PermissionError(f"Permission denied: cannot delete '{file_path}'.")
+        raise PermissionError(
+            f"Permission denied: cannot delete '{file_path}'."
+        )
     except IsADirectoryError:
         raise IsADirectoryError(f"'{file_path}' is a directory, not a file.")
     except OSError as e:
-        raise OSError(f"Filesystem error while deleting '{config_filename}': {e}")
+        raise OSError(
+            f"Filesystem error while deleting '{config_filename}': {e}"
+        )
 
     return True
 
@@ -79,13 +95,17 @@ def rename_config(old_harness: str, new_harness: str) -> bool:
         raise FileNotFoundError(f"Directory '{CONFIG_DIR}' not found.")
 
     if not os.path.exists(old_path):
-        raise FileNotFoundError(f"Config file '{old_filename}' not found in '{CONFIG_DIR}'.")
+        raise FileNotFoundError(
+            f"Config file '{old_filename}' not found in '{CONFIG_DIR}'."
+        )
 
     if old_harness == new_harness:
         return True
 
     if os.path.exists(new_path):
-        raise FileExistsError(f"A config file with the name '{new_filename}' already exists in '{CONFIG_DIR}'.")
+        raise FileExistsError(
+            f"A config file with the name '{new_filename}' already exists in '{CONFIG_DIR}'."
+        )
 
     try:
         os.rename(old_path, new_path)
@@ -113,12 +133,14 @@ def list_config() -> list:
         return [
             filename.removesuffix(".json")
             for filename in os.listdir(CONFIG_DIR)
-            if filename.endswith(".json") and 
-            os.path.isfile(os.path.join(CONFIG_DIR, filename)) and
-            VALID_FILENAME_PATTERN.match(filename.removesuffix(".json"))
+            if filename.endswith(".json")
+            and os.path.isfile(os.path.join(CONFIG_DIR, filename))
+            and VALID_FILENAME_PATTERN.match(filename.removesuffix(".json"))
         ]
     except PermissionError:
-        raise PermissionError(f"Permission denied: cannot access '{CONFIG_DIR}'.")
+        raise PermissionError(
+            f"Permission denied: cannot access '{CONFIG_DIR}'."
+        )
     except OSError as e:
         raise OSError(f"Filesystem error while accessing '{CONFIG_DIR}': {e}")
 
@@ -134,7 +156,9 @@ def read_config(harness_name: str) -> dict:
         raise FileNotFoundError(f"Directory '{CONFIG_DIR}' not found.")
 
     if not os.path.exists(file_path):
-        raise FileNotFoundError(f"Config file '{config_filename}' not found in '{CONFIG_DIR}'.")
+        raise FileNotFoundError(
+            f"Config file '{config_filename}' not found in '{CONFIG_DIR}'."
+        )
 
     try:
         with open(file_path, "r", encoding="utf-8") as file:
@@ -186,7 +210,9 @@ def validate_config(harness_name: str, schema_path: str) -> bool:
         raise ValueError(f"Invalid harness name: '{harness_name}'")
 
     schema_data = load_json_file(schema_path)
-    config_data = load_json_file(os.path.join(CONFIG_DIR, f"{harness_name}.json"))
+    config_data = load_json_file(
+        os.path.join(CONFIG_DIR, f"{harness_name}.json")
+    )
 
     validate_json(config_data, schema_data)
     return True

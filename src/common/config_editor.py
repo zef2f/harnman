@@ -10,8 +10,10 @@ def _resolve_config_path(harness_name: str) -> str:
     Check that the CONFIG_DIR directory exists.
     """
     if not os.path.isdir(CONFIG_DIR):
-        raise FileNotFoundError(f"Configuration directory '{CONFIG_DIR}' not found. "
-                                "Please create it or set HARNMAN_CONFIG_DIR.")
+        raise FileNotFoundError(
+            f"Configuration directory '{CONFIG_DIR}' not found. "
+            "Please create it or set HARNMAN_CONFIG_DIR."
+        )
 
     config_filename = f"{harness_name}.json"
     return os.path.join(CONFIG_DIR, config_filename)
@@ -46,7 +48,9 @@ def _save_config_data(harness_name: str, config_data: dict) -> None:
         with open(file_path, "w", encoding="utf-8") as file:
             json.dump(config_data, file, indent=4)
     except PermissionError:
-        raise PermissionError(f"Permission denied: cannot write to '{file_path}'.")
+        raise PermissionError(
+            f"Permission denied: cannot write to '{file_path}'."
+        )
     except OSError as e:
         raise OSError(f"Filesystem error while writing '{file_path}': {e}")
 
@@ -61,7 +65,9 @@ def read_config_field(harness_name: str, field_path: str):
     ref = config_data
     for key in keys:
         if key not in ref:
-            raise KeyError(f"Key '{field_path}' not found in '{harness_name}.json'.")
+            raise KeyError(
+                f"Key '{field_path}' not found in '{harness_name}.json'."
+            )
         ref = ref[key]
 
     return ref
@@ -96,14 +102,18 @@ def delete_config_field(harness_name: str, field_path: str) -> bool:
     ref = config_data
     for key in keys[:-1]:
         if key not in ref or not isinstance(ref[key], dict):
-            raise KeyError(f"Key '{field_path}' not found in '{harness_name}.json'.")
+            raise KeyError(
+                f"Key '{field_path}' not found in '{harness_name}.json'."
+            )
         ref = ref[key]
 
     last_key = keys[-1]
     if last_key in ref:
         del ref[last_key]
     else:
-        raise KeyError(f"Key '{field_path}' not found in '{harness_name}.json'.")
+        raise KeyError(
+            f"Key '{field_path}' not found in '{harness_name}.json'."
+        )
 
     _save_config_data(harness_name, config_data)
     return True

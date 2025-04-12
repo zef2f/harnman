@@ -20,6 +20,7 @@ def config_dir(tmp_path, monkeypatch):
 
     # Reloads `config_manager`, so it updates CONFIG_DIR
     import importlib
+
     importlib.reload(config_manager)
 
     yield config_path  # Passes test path to tests
@@ -151,10 +152,8 @@ def test_validate_config_success(config_dir):
     schema_path = config_dir / "test_schema.json"
     schema = {
         "type": "object",
-        "properties": {
-            "foo": {"type": "string"}
-        },
-        "required": ["foo"]
+        "properties": {"foo": {"type": "string"}},
+        "required": ["foo"],
     }
     schema_path.write_text(json.dumps(schema), encoding="utf-8")
 
@@ -169,10 +168,8 @@ def test_validate_config_failure(config_dir):
     schema_path = config_dir / "test_schema.json"
     schema = {
         "type": "object",
-        "properties": {
-            "must_be_int": {"type": "integer"}
-        },
-        "required": ["must_be_int"]
+        "properties": {"must_be_int": {"type": "integer"}},
+        "required": ["must_be_int"],
     }
     schema_path.write_text(json.dumps(schema), encoding="utf-8")
 
@@ -185,7 +182,9 @@ def test_validate_config_failure(config_dir):
 def test_add_config_invalid_data_type(config_dir):
     """Tests that add_config raises TypeError when data is not a dictionary."""
     invalid_data = ["not", "a", "dict"]
-    with pytest.raises(TypeError, match="Parameter 'data' must be a dictionary"):
+    with pytest.raises(
+        TypeError, match="Parameter 'data' must be a dictionary"
+    ):
         config_manager.add_config("test_harness", invalid_data)
 
 
@@ -199,7 +198,10 @@ def test_add_config_invalid_filename(config_dir):
         " ",
     ]
     for name in invalid_names:
-        with pytest.raises(ValueError, match=r"Invalid harness name:.*Use only letters, numbers, underscore and hyphen"):
+        with pytest.raises(
+            ValueError,
+            match=r"Invalid harness name:.*Use only letters, numbers, underscore and hyphen",
+        ):
             config_manager.add_config(name, {"key": "value"})
 
 
@@ -207,11 +209,11 @@ def test_list_config_with_non_json_files(config_dir):
     """Tests that list_config ignores non-JSON files."""
     # Create JSON file
     config_manager.add_config("valid_config", {"key": "value"})
-    
+
     # Create non-JSON files
     (config_dir / "not_json.txt").write_text("hello")
     (config_dir / "also_not.json.bak").write_text("{}")
-    
+
     result = config_manager.list_config()
     assert result == ["valid_config"]
 
@@ -220,12 +222,12 @@ def test_list_config_with_subdirs(config_dir):
     """Tests that list_config works correctly with subdirectories."""
     # Create JSON file
     config_manager.add_config("valid_config", {"key": "value"})
-    
+
     # Create subdirectory
     subdir = config_dir / "subdir"
     subdir.mkdir()
     (subdir / "config.json").write_text("{}")
-    
+
     result = config_manager.list_config()
     assert result == ["valid_config"]
 
@@ -234,11 +236,11 @@ def test_validate_config_invalid_schema(config_dir):
     """Tests validate_config with invalid schema."""
     # Create test config
     config_manager.add_config("test_harness", {"foo": "bar"})
-    
+
     # Create invalid schema
     schema_path = config_dir / "invalid_schema.json"
     schema_path.write_text('{"type": "invalid_type"}', encoding="utf-8")
-    
+
     with pytest.raises(ValueError, match="Schema is invalid"):
         config_manager.validate_config("test_harness", str(schema_path))
 
@@ -246,9 +248,11 @@ def test_validate_config_invalid_schema(config_dir):
 def test_validate_config_schema_not_found(config_dir):
     """Tests validate_config when schema file is not found."""
     config_manager.add_config("test_harness", {"foo": "bar"})
-    
+
     with pytest.raises(FileNotFoundError):
-        config_manager.validate_config("test_harness", "nonexistent_schema.json")
+        config_manager.validate_config(
+            "test_harness", "nonexistent_schema.json"
+        )
 
 
 def test_validate_config_various_errors(config_dir):
@@ -259,30 +263,36 @@ def test_validate_config_various_errors(config_dir):
         "properties": {
             "number": {"type": "integer", "minimum": 0},
             "string": {"type": "string", "pattern": "^[A-Z]+$"},
-            "required_field": {"type": "string"}
+            "required_field": {"type": "string"},
         },
-        "required": ["required_field"]
+        "required": ["required_field"],
     }
     schema_path = config_dir / "test_schema.json"
     schema_path.write_text(json.dumps(schema), encoding="utf-8")
-    
+
     # Test 1: missing required field
     config_manager.add_config("missing_required", {"number": 42})
     with pytest.raises(ValueError, match="Validation failed"):
         config_manager.validate_config("missing_required", str(schema_path))
-    
+
     # Test 2: wrong data type
-    config_manager.add_config("wrong_type", {"number": "not_a_number", "required_field": "ok"})
+    config_manager.add_config(
+        "wrong_type", {"number": "not_a_number", "required_field": "ok"}
+    )
     with pytest.raises(ValueError, match="Validation failed"):
         config_manager.validate_config("wrong_type", str(schema_path))
-    
+
     # Test 3: pattern violation
-    config_manager.add_config("invalid_pattern", {"string": "lowercase", "required_field": "ok"})
+    config_manager.add_config(
+        "invalid_pattern", {"string": "lowercase", "required_field": "ok"}
+    )
     with pytest.raises(ValueError, match="Validation failed"):
         config_manager.validate_config("invalid_pattern", str(schema_path))
-    
+
     # Test 4: minimum value violation
-    config_manager.add_config("invalid_minimum", {"number": -1, "required_field": "ok"})
+    config_manager.add_config(
+        "invalid_minimum", {"number": -1, "required_field": "ok"}
+    )
     with pytest.raises(ValueError, match="Validation failed"):
         config_manager.validate_config("invalid_minimum", str(schema_path))
 
@@ -297,12 +307,12 @@ def test_validate_config_invalid_harness_name(config_dir):
         " ",
         "имя_по_русски",
         "name with spaces",
-        "name.with.dots"
+        "name.with.dots",
     ]
-    
+
     schema_path = config_dir / "schema.json"
     schema_path.write_text('{"type": "object"}', encoding="utf-8")
-    
+
     for name in invalid_names:
         with pytest.raises(ValueError, match="Invalid harness name"):
             config_manager.validate_config(name, str(schema_path))
@@ -317,24 +327,19 @@ def test_validate_config_detailed_error_message(config_dir):
             "nested": {
                 "type": "object",
                 "properties": {
-                    "array": {
-                        "type": "array",
-                        "items": {"type": "integer"}
-                    }
-                }
+                    "array": {"type": "array", "items": {"type": "integer"}}
+                },
             }
-        }
+        },
     }
     schema_path = config_dir / "nested_schema.json"
     schema_path.write_text(json.dumps(schema), encoding="utf-8")
-    
+
     # Create config with error in nested field
-    config_manager.add_config("nested_config", {
-        "nested": {
-            "array": [1, "not an integer", 3]
-        }
-    })
-    
+    config_manager.add_config(
+        "nested_config", {"nested": {"array": [1, "not an integer", 3]}}
+    )
+
     with pytest.raises(ValueError, match=r"at 'nested -> array -> 1'"):
         config_manager.validate_config("nested_config", str(schema_path))
 
@@ -343,7 +348,7 @@ def test_list_config_filters_invalid_names(config_dir):
     """Tests that list_config filters files with invalid names."""
     # Create valid config
     config_manager.add_config("valid_name", {"key": "value"})
-    
+
     # Create files with invalid names (directly, as add_config won't accept them)
     invalid_files = [
         "name.with.dots.json",
@@ -351,14 +356,14 @@ def test_list_config_filters_invalid_names(config_dir):
         "имя_по_русски.json",
         ".hidden.json",
         "..invalid.json",
-        "invalid/path.json"
+        "invalid/path.json",
     ]
-    
+
     for filename in invalid_files:
         try:
             (config_dir / filename).write_text("{}", encoding="utf-8")
         except OSError:
             continue  # Skip if we can't create file with such name
-    
+
     result = config_manager.list_config()
     assert result == ["valid_name"]

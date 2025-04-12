@@ -41,7 +41,10 @@ def test_resolve_config_path_no_dir(tmp_path, monkeypatch):
     monkeypatch.setenv("HARNMAN_CONFIG_DIR", str(nonexistent_dir))
     importlib.reload(config_editor)
 
-    with pytest.raises(FileNotFoundError, match=f"Configuration directory '{nonexistent_dir}' not found"):
+    with pytest.raises(
+        FileNotFoundError,
+        match=f"Configuration directory '{nonexistent_dir}' not found",
+    ):
         config_editor._resolve_config_path("test_harness")
 
 
@@ -49,7 +52,7 @@ def test_load_config_data_success(config_dir):
     """Tests successful loading of configuration data."""
     config_name = "test_harness"
     test_data = {"test": "data"}
-    
+
     config_path = config_dir / f"{config_name}.json"
     config_path.write_text(json.dumps(test_data), encoding="utf-8")
 
@@ -77,9 +80,9 @@ def test_save_config_data_success(config_dir):
     """Tests successful saving of configuration data."""
     config_name = "test_harness"
     test_data = {"test": "data"}
-    
+
     config_editor._save_config_data(config_name, test_data)
-    
+
     config_path = config_dir / f"{config_name}.json"
     assert json.loads(config_path.read_text(encoding="utf-8")) == test_data
 
@@ -92,7 +95,9 @@ def test_read_config_field_success(config_dir):
     config_path = config_dir / f"{config_name}.json"
     config_path.write_text(json.dumps(initial_data), encoding="utf-8")
 
-    value = config_editor.read_config_field(config_name, "fuzz.options.max_runs")
+    value = config_editor.read_config_field(
+        config_name, "fuzz.options.max_runs"
+    )
     assert value == 100
 
 
@@ -104,7 +109,9 @@ def test_read_config_field_not_found(config_dir):
     config_path = config_dir / f"{config_name}.json"
     config_path.write_text(json.dumps(initial_data), encoding="utf-8")
 
-    with pytest.raises(KeyError, match="Key 'fuzz.options.max_runs' not found"):
+    with pytest.raises(
+        KeyError, match="Key 'fuzz.options.max_runs' not found"
+    ):
         config_editor.read_config_field(config_name, "fuzz.options.max_runs")
 
 
@@ -116,7 +123,10 @@ def test_read_config_field_invalid_path(config_dir):
     config_path = config_dir / f"{config_name}.json"
     config_path.write_text(json.dumps(initial_data), encoding="utf-8")
 
-    with pytest.raises(KeyError, match=r"Key 'fuzz\.options\.max_runs' not found in 'test_harness\.json'"):
+    with pytest.raises(
+        KeyError,
+        match=r"Key 'fuzz\.options\.max_runs' not found in 'test_harness\.json'",
+    ):
         config_editor.read_config_field(config_name, "fuzz.options.max_runs")
 
 
@@ -128,7 +138,9 @@ def test_update_config_field_new_field(config_dir):
     config_path = config_dir / f"{config_name}.json"
     config_path.write_text(json.dumps(initial_data), encoding="utf-8")
 
-    result = config_editor.update_config_field(config_name, "fuzz.options.max_runs", 200)
+    result = config_editor.update_config_field(
+        config_name, "fuzz.options.max_runs", 200
+    )
     assert result is True
 
     with open(config_path, "r", encoding="utf-8") as f:
@@ -145,7 +157,9 @@ def test_update_config_field_existing_field(config_dir):
     config_path = config_dir / f"{config_name}.json"
     config_path.write_text(json.dumps(initial_data), encoding="utf-8")
 
-    result = config_editor.update_config_field(config_name, "fuzz.options.max_runs", 300)
+    result = config_editor.update_config_field(
+        config_name, "fuzz.options.max_runs", 300
+    )
     assert result is True
 
     with open(config_path, "r", encoding="utf-8") as f:
@@ -162,7 +176,9 @@ def test_update_config_field_nested_creation(config_dir):
     config_path = config_dir / f"{config_name}.json"
     config_path.write_text(json.dumps(initial_data), encoding="utf-8")
 
-    result = config_editor.update_config_field(config_name, "fuzz.options.depth.level", "deep_value")
+    result = config_editor.update_config_field(
+        config_name, "fuzz.options.depth.level", "deep_value"
+    )
     assert result is True
 
     with open(config_path, "r", encoding="utf-8") as f:
@@ -179,7 +195,9 @@ def test_update_config_field_overwrite_non_dict(config_dir):
     config_path = config_dir / f"{config_name}.json"
     config_path.write_text(json.dumps(initial_data), encoding="utf-8")
 
-    result = config_editor.update_config_field(config_name, "fuzz.options.max_runs", 100)
+    result = config_editor.update_config_field(
+        config_name, "fuzz.options.max_runs", 100
+    )
     assert result is True
 
     with open(config_path, "r", encoding="utf-8") as f:
@@ -196,7 +214,9 @@ def test_delete_config_field_success(config_dir):
     config_path = config_dir / f"{config_name}.json"
     config_path.write_text(json.dumps(initial_data), encoding="utf-8")
 
-    result = config_editor.delete_config_field(config_name, "fuzz.options.max_runs")
+    result = config_editor.delete_config_field(
+        config_name, "fuzz.options.max_runs"
+    )
     assert result is True
 
     with open(config_path, "r", encoding="utf-8") as f:
@@ -213,7 +233,9 @@ def test_delete_config_field_not_found(config_dir):
     config_path = config_dir / f"{config_name}.json"
     config_path.write_text(json.dumps(initial_data), encoding="utf-8")
 
-    with pytest.raises(KeyError, match="Key 'fuzz.options.max_runs' not found"):
+    with pytest.raises(
+        KeyError, match="Key 'fuzz.options.max_runs' not found"
+    ):
         config_editor.delete_config_field(config_name, "fuzz.options.max_runs")
 
 
@@ -225,5 +247,7 @@ def test_delete_config_field_invalid_path(config_dir):
     config_path = config_dir / f"{config_name}.json"
     config_path.write_text(json.dumps(initial_data), encoding="utf-8")
 
-    with pytest.raises(KeyError, match="Key 'fuzz.options.max_runs' not found"):
+    with pytest.raises(
+        KeyError, match="Key 'fuzz.options.max_runs' not found"
+    ):
         config_editor.delete_config_field(config_name, "fuzz.options.max_runs")

@@ -1,6 +1,3 @@
 """
 Common utilities for harnman.
 """
-
-
-
