@@ -6,38 +6,6 @@ import sys
 from . import config_manager, config_editor
 
 
-def _expand_shell_substitutions(cmd: str) -> str:
-    """
-    Finds all occurrences of $(...) and executes them as shell commands,
-    returning the substituted result.
-
-    Args:
-        cmd: Command string that may contain $(...) substitutions
-
-    Returns:
-        Command string with all $(...) replaced by their execution results
-    """
-    pattern = r"\$\(([^)]+)\)"  # Regex to find $(...)
-
-    def _replace(match):
-        # Extract command without parentheses
-        command_inside = match.group(1).strip()
-        try:
-            # Execute command in shell and return result without extra newlines
-            output = subprocess.check_output(
-                command_inside, shell=True, text=True
-            )
-            return output.strip()
-        except subprocess.CalledProcessError as e:
-            print(
-                f"[ERROR] Shell substitution failed for '{command_inside}': {e}",
-                file=sys.stderr,
-            )
-            return ""
-
-    return re.sub(pattern, _replace, cmd)
-
-
 def get_harn_names() -> list:
     try:
         return config_manager.list_config()

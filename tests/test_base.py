@@ -29,32 +29,6 @@ def mock_build_cmds():
     }
 
 
-def test_expand_shell_substitutions():
-    """Test shell command substitution functionality."""
-    assert base._expand_shell_substitutions("echo test") == "echo test"
-
-    # Test command with substitution
-    with patch("subprocess.check_output", return_value="test_output\n"):
-        assert (
-            base._expand_shell_substitutions("prefix $(echo test) suffix")
-            == "prefix test_output suffix"
-        )
-
-    # Test multiple substitutions
-    with patch("subprocess.check_output", side_effect=["one\n", "two\n"]):
-        assert (
-            base._expand_shell_substitutions("$(echo one) middle $(echo two)")
-            == "one middle two"
-        )
-
-    # Test command execution error
-    with patch(
-        "subprocess.check_output",
-        side_effect=subprocess.CalledProcessError(1, "cmd"),
-    ):
-        assert base._expand_shell_substitutions("$(invalid_command)") == ""
-
-
 @patch("src.common.config_manager.list_config")
 def test_get_harn_names(mock_list_config, mock_harn_names):
     """
